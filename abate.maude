@@ -1,0 +1,9 @@
+mod ABATE-FIND-RULES
+  is protecting META-LEVEL .
+
+  op findProblemRules(_,_) : Module Term -> RuleSet .
+
+  var M : Module . var T : Term .
+  eq findProblemRules(M, T) = getRls(M) .
+
+endm

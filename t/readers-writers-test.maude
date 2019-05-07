@@ -1,0 +1,27 @@
+in readers-writers.maude .
+in readers-writers-single-rule.maude .
+in ../abate.maude .
+
+mod R+W-TEST is
+  protecting ABATE-FIND-RULES
+             + (R+W)
+             + STRING .
+
+  op initialTerm      : -> Config .
+
+  op findRulesTest(_,_,_) : RuleSet RuleSet String -> String .
+
+  eq initialTerm = < 0 , 0 > .
+
+  var O : RuleSet . var E : RuleSet .
+  var M : String .
+  eq findRulesTest(O, E, M) = if (O == E) then ("Pass") else ( M ) fi .
+endm
+
+red in R+W-TEST : findRulesTest( findProblemRules( upModule( ('R+W), true )
+                                                 , upTerm( < 0 , 0 > )
+                                                 )
+                               , upRls( ('R+W-SINGLE-RULE), false )
+                               , "Fail" ) .
+
+quit .

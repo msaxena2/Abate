@@ -1,0 +1,15 @@
+mod R+W-SINGLE-RULE is
+  protecting NAT .
+
+  sort Config .
+
+  op <_,_> : Nat Nat -> Config [ctor] .
+    --- readers/writers
+
+  --- Getting around parsing issues.
+  op initTerm : -> Config .
+  vars R W : Nat .
+
+  rl < 0, 0 > => < 0, s(0) > .
+
+endm
