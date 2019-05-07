@@ -1,7 +1,7 @@
 mod ABATE-FIND-RULES
   is protecting META-LEVEL .
 
-  sort State .
+  sorts State Config .
 
   sorts LabeledRulePair LabeledRuleSet TermSet .
 
@@ -9,7 +9,11 @@ mod ABATE-FIND-RULES
 
   subsort Term < TermSet .
 
+  sort StageMonad .
 
+  op  _ \= (_ _) : StageMonad Universal StageMonad -> StageMonad [assoc] .
+
+  op return(_) : StageMonad -> RuleSet .
 
   op emptyTermSet : -> Term [ctor] .
 
@@ -43,9 +47,10 @@ mod ABATE-FIND-RULES
 
   var M : Module . var T : Term .
 
-
   eq findProblemRules(M, T)
-    = problemRulesFromState({ T | emptyTermSet | none | labelRules(0, getRls(M)) } ) .
+    =     ({ T | emptyTermSet | none | labelRules(0, getRls(M)) })
+      \=  ({ T | emptyTermSet | none | labelRules(0, getRls(M)) })
+
 
 endm
 
