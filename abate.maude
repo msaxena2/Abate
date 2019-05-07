@@ -1,4 +1,4 @@
-mod ABATE-FIND-RULES
+mod ABATE-PIPELINE
   is protecting META-LEVEL .
 
   sort State .
@@ -10,10 +10,19 @@ mod ABATE-FIND-RULES
   subsort Term < TermSet .
 
 
-
   op emptyTermSet : -> Term [ctor] .
 
   op _&ts_ : TermSet TermSet -> TermSet [assoc comm id: emptyTermSet] .
+
+  --- State
+  op { _ | _ | _ | _ } :
+    TermSet TermSet RuleSet LabeledRuleSet -> State [ctor] .
+endm
+
+
+
+mod ABATE-FIND-RULES
+  is including ABATE-PIPELINE .
 
   --- Given a Set a of Rules, assign natural numbers as labels to them .
 
@@ -33,19 +42,12 @@ mod ABATE-FIND-RULES
   eq labelRules(N, none) = emptyLabelRulePair .
   eq labelRules(N, R Rs) = (N, R) &lrs labelRules(s(N), Rs) .
 
-  --- State
-  op { _ | _ | _ | _ } :
-    TermSet TermSet RuleSet LabeledRuleSet -> State [ctor] .
-
   op findProblemRules(_,_) : Module Term -> RuleSet .
 
   op problemRulesFromState(_) : State -> RuleSet .
 
   var M : Module . var T : Term .
-
-
   eq findProblemRules(M, T)
     = problemRulesFromState({ T | emptyTermSet | none | labelRules(0, getRls(M)) } ) .
-
 endm
 
