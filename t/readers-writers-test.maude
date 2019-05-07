@@ -24,4 +24,7 @@ red in R+W-TEST : findRulesTest( findProblemRules( upModule( ('R+W), true )
                                , upRls( ('R+W-SINGLE-RULE), false )
                                , "Fail" ) .
 
+red in R+W-TEST :  findProblemRules( upModule( ('R+W), true )
+                                             , upTerm( < 0 , 0 > )
+                                   ) .
 quit .

@@ -1,9 +1,45 @@
 mod ABATE-FIND-RULES
   is protecting META-LEVEL .
 
+  sort State .
+
+  sorts LabeledRulePair LabeledRuleSet TermSet .
+
+  subsort LabeledRulePair < LabeledRuleSet .
+
+  subsort Term < TermSet .
+
+  op (_,_) : Nat Rule -> LabeledRulePair [ctor] .
+
+  op emptyLabelRulePair : -> LabeledRulePair [ctor] .
+
+  op emptyTermSet : -> Term [ctor] .
+
+  op _&lrs_ : LabeledRuleSet LabeledRuleSet -> LabeledRuleSet [assoc comm id:
+  emptyLabelRulePair] .
+
+  op _&ts_ : TermSet TermSet -> TermSet [assoc comm id: emptyTermSet] .
+
+  op labelRules(_,_) : Nat RuleSet -> LabeledRuleSet [ctor] .
+  --- Given a Set a of Rules, assign natural numbers as labels to them .
+  var R : Rule .
+  var Rs : RuleSet .
+  var N : Nat .
+  eq labelRules(N, none) = emptyLabelRulePair .
+  eq labelRules(N, R Rs) = (N, R) &lrs labelRules(s(N), Rs) .
+
+  op { _ | _ | _ | _ } :
+    TermSet TermSet RuleSet LabeledRuleSet -> State [ctor] .
+
   op findProblemRules(_,_) : Module Term -> RuleSet .
 
+  op problemRulesFromState(_) : State -> RuleSet .
+
   var M : Module . var T : Term .
-  eq findProblemRules(M, T) = getRls(M) .
+
+
+  eq findProblemRules(M, T) = problemRulesFromState({ T | emptyTermSet | none |
+  labelRules(0, getRls(M)) } ) .
 
 endm
+
