@@ -1,19 +1,20 @@
 fmod ABATE-STATE is
-  protecting META-LEVEL .
+
   sort State .
   sorts   SubState   SubStates .
   subsort SubState < SubStates .
 
   sorts Tag Contents .
-  op empty :                     -> SubState  [ctor] .
-  op _@_   : Contents Tag        -> SubStates [ctor] .
-  op _|_   : SubStates SubStates -> SubStates [assoc comm id: empty] .
-  op {_}   : SubStates           -> State     [ctor] .
+  op emptySubstate :                     -> SubState  [ctor] .
+  op _@_           : Contents Tag        -> SubStates [ctor] .
+  op _|_           : SubStates SubStates -> SubStates [ctor assoc comm id: emptySubstate] .
+  op {_}           : SubStates           -> State     [ctor] .
+
 endfm
 
 
 fmod ABATE-PIPELINE
-  is protecting ABATE-STATE .
+  is extending ABATE-STATE .
 
   sorts   PipelineStep PipelineSteps .
 
@@ -38,7 +39,8 @@ endfm
 
 
 fmod ABATE-FIND-RULES
-  is protecting ABATE-PIPELINE .
+  is extending ABATE-PIPELINE .
+     protecting META-LEVEL .
 
    sorts LabeledRulePair LabeledRuleSet TermSet .
 
@@ -46,8 +48,8 @@ fmod ABATE-FIND-RULES
    subsort Term            < TermSet        < Contents .
    subsort Module          < Contents .
 
-   --- This inclusion causes problems, so we improvise.
-   subsort Rule < RuleSet  < Contents .
+   --- This subsort causes problems.
+   ---- subsort RuleSet  < Contents .
 
 
    --- op fmodule       : -> Tag [ctor] .
