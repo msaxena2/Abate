@@ -1,4 +1,5 @@
-mod ABATE-STATE is
+fmod ABATE-STATE is
+  protecting META-LEVEL .
   sort State .
   sorts   SubState   SubStates .
   subsort SubState < SubStates .
@@ -8,11 +9,11 @@ mod ABATE-STATE is
   op _@_   : Contents Tag        -> SubStates [ctor] .
   op _|_   : SubStates SubStates -> SubStates [assoc comm id: empty] .
   op {_}   : SubStates           -> State     [ctor] .
-endm
+endfm
 
 
-mod ABATE-PIPELINE
-  is including ABATE-STATE .
+fmod ABATE-PIPELINE
+  is protecting ABATE-STATE .
 
   sorts   PipelineStep PipelineSteps .
 
@@ -29,15 +30,15 @@ mod ABATE-PIPELINE
   op #done    : -> PipelineStep [ctor] .
 
 
-  --- State
+  --- Replacement for the original ugly
   --- op { _ | _ | _ | _ | _ | _ } :
   ---   PipelineSteps Module TermSet TermSet RuleSet LabeledRuleSet -> State [ctor] .
 
-endm
+endfm
 
 
-mod ABATE-FIND-RULES
-  is including META-LEVEL + ABATE-PIPELINE .
+fmod ABATE-FIND-RULES
+  is protecting ABATE-PIPELINE .
 
    sorts LabeledRulePair LabeledRuleSet TermSet .
 
@@ -46,10 +47,10 @@ mod ABATE-FIND-RULES
    subsort Module          < Contents .
 
    --- This inclusion causes problems, so we improvise.
-   --- subsort Rule < RuleSet  < Contents .
+   subsort Rule < RuleSet  < Contents .
 
 
-   --- op module       : -> Tag [ctor] .
+   --- op fmodule       : -> Tag [ctor] .
    --- op seenTerms    : -> Tag [ctor] .
    --- op termQueue    : -> Tag [ctor] .
    --- op goodRules    : -> Tag [ctor] .
@@ -77,12 +78,12 @@ mod ABATE-FIND-RULES
    --- var P : PipelineStep . var Ps : PipelineSteps .
    --- var Ss : SubStates . var M : Module .
 
-   --- eq { ((#labelRules &p Ps ) @ pipeline) | (M @ module) | (emptyLabelRulePair @ labeledRules) | Ss }
-   ---  = { (Ps @ pipeline) | (M @ module ) | ( labelRules(0, getRls(M)) @ labeledRules) | Ss } .
-endm
+   --- eq { ((#labelRules &p Ps ) @ pipeline) | (M @ fmodule) | (emptyLabelRulePair @ labeledRules) | Ss }
+   ---  = { (Ps @ pipeline) | (M @ fmodule ) | ( labelRules(0, getRls(M)) @ labeledRules) | Ss } .
+endfm
 
---- mod ABATE-FIND-RULES-AUX
----   is including ABATE-FIND-RULES .
+--- fmod ABATE-FIND-RULES-AUX
+---   is protecting ABATE-FIND-RULES .
 ---
 ---   op findProblemRules(_,_)    : Module Term -> RuleSet .
 ---   op problemRulesFromState(_) : State       -> RuleSet .
@@ -90,53 +91,13 @@ endm
 ---   var M : Module . var T : Term .
 ---   eq findProblemRules(M, T) = problemRulesFromState(
 ---                                   {   ((#labelRules &p #done) @ pipeline )
----                                     | (M                      @ module)
+---                                     | (M                      @ fmodule)
 ---                                     | (emptyLabelRulePair     @ labeledRules)
 ---                                     | (T                      @ seenTerms)
 ---                                     | (none                   @ goodRules)
 ---                                     | (emptyLabelRulePair     @ labeledRules)
 ---                                   }) .
 ---
---- endm
---- mod ABATE-FIND-RULES
----   is including ABATE-PIPELINE .
----
----   --- Given a Set a of Rules, assign natural numbers as labels to them .
----   op #labelRules : -> PipelineStep [ctor] .
----
----   op (_,_) : Nat Rule -> LabeledRulePair [ctor] .
----
----   op emptyLabelRulePair : -> LabeledRulePair [ctor] .
----
----   op _&lrs_ : LabeledRuleSet LabeledRuleSet
----                 -> LabeledRuleSet [assoc comm id: emptyLabelRulePair] .
----
----
----   op labelRules(_,_) : Nat RuleSet -> LabeledRuleSet [ctor] .
----
----   var R : Rule .
----   var Rs : RuleSet .
----   var N : Nat .
----   eq labelRules(N, none) = emptyLabelRulePair .
----   eq labelRules(N, R Rs) = (N, R) &lrs labelRules(s(N), Rs) .
----
----   op findProblemRules(_,_) : Module Term -> RuleSet .
----
----   op problemRulesFromState(_) : State -> RuleSet .
----
----   var M : Module . var T : Term .
----   eq findProblemRules(M, T)
----     = problemRulesFromState({ #labelRules ~p #done | M | T | emptyTermSet | none | emptyLabelRulePair }) .
----
----   var PS : PipelineSteps .
----   vars TS TS': TermSet . var RS :RuleSet .
----
----   eq { #labelRules ~p #done | M | TS | TS' | RS | emptyLabelRulePair } = { PS |
----   M | TS | TS' | RS | labelRules(0, getRls(M)) } .
----
----   var RS : RuleSet . var LR : LabeledRuleSet .
----   eq problemRulesFromState({ #done | M | TS | TS' | RS | LR }) = RS .
----
---- endm
+--- endfm
 
 
