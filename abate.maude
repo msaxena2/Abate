@@ -31,15 +31,23 @@ mod ABATE-PIPELINE
   op #done    : -> PipelineStep [ctor] .
 endm
 
+mod ABATE-META-LEVEL
+  is protecting META-LEVEL * ( op getName : Module          -> Qid to getModuleName
+                             , op __      : RuleSet RuleSet -> RuleSet to _&rs_ [format(d ni d d)]
+                             , op none    :                 -> RuleSet to emptyRuleSet ) .
+
+endm
 
 mod ABATE-FIND-RULES
   is extending ABATE-PIPELINE .
-     protecting META-LEVEL .
+     protecting ABATE-META-LEVEL .
 
    sorts LabeledRulePair LabeledRuleSet TermSet .
 
    subsort LabeledRulePair < LabeledRuleSet < Contents .
-   subsort Term < TermSet .
+   subsort Term < TermSet < Contents .
+   subsort RuleSet < Contents .
+   subsort Module < Contents .
 
    op module       : -> Tag [ctor] .
    op seenTerms    : -> Tag [ctor] .
@@ -50,19 +58,6 @@ mod ABATE-FIND-RULES
 
    op emptyTermSet :                 -> TermSet [ctor] .
    op _&ts_        : TermSet TermSet -> TermSet [assoc comm id: emptyTermSet] .
-
-   op asContentsTermSet(_) : TermSet -> Contents [ctor] .
-   op asContentsModule(_)  : Module  -> Contents [ctor] .
-   op asContentsRuleSet(_) : RuleSet -> Contents [ctor] .
-
-   op fromContentsTermSet(_) : Contents -> TermSet .
-   op fromContentsModule(_)  : Contents -> Module .
-   op fromContentsRuleSet(_) : Contents -> RuleSet .
-
-   var TS : TermSet . var M : Module . var RS : RuleSet .
-   eq fromContentsTermSet(asContentsTermSet(TS)) = TS .
-   eq fromContentsModule(asContentsModule(M))    = M .
-   eq fromContentsRuleSet(asContentsRuleSet(RS)) = RS .
 
    op #labelRules : -> PipelineStep [ctor] .
 
@@ -75,21 +70,21 @@ mod ABATE-FIND-RULES
 
    op labelRules(_,_) : Nat RuleSet -> LabeledRuleSet [ctor] .
 
-   var R : Rule . var N : Nat .
+   var R : Rule . var N : Nat . var RS : RuleSet .
 
-   eq labelRules(N, none) = emptyLabelRulePair .
-   eq labelRules(N, R RS) = (N, R) &lrs labelRules(s(N), RS) .
+   eq labelRules(N, emptyRuleSet) = emptyLabelRulePair .
+   eq labelRules(N, R &rs RS)     = (N, R) &lrs labelRules(s(N), RS) .
 
    var P : PipelineStep . var Ps : PipelineSteps .
-   var Ss : SubStates . var MC : Contents .
+   var Ss : SubStates . var M : Module  .
 
-    rl  {  ((#labelRules &p Ps ) @ pipeline)
-         | (MC                   @ module)
-         | (emptyLabelRulePair   @ labeledRules)
+    rl  {  ((#labelRules &p Ps )     @ pipeline)
+         | (M                        @ module)
+         | (emptyLabelRulePair       @ labeledRules)
          | Ss }
-     => {  (Ps                                             @ pipeline )
-         | (MC                                             @ module )
-         | (labelRules(0, getRls(fromContentsModule(MC)))  @ labeledRules )
+     => {  (Ps                       @ pipeline )
+         | (M                        @ module )
+         | (labelRules(0, getRls(M)) @ labeledRules )
          | Ss } .
 endm
 
@@ -101,14 +96,13 @@ mod ABATE-FIND-RULES-AUX
 
   var M : Module . var T : Term .
   eq findProblemRules(M, T) = problemRulesFromState(
-                                  {   ((#labelRules &p #done)  @ pipeline )
-                                    | (asContentsModule(M)     @ module)
-                                    | (emptyLabelRulePair      @ labeledRules)
-                                    | (asContentsTermSet(T)    @ seenTerms)
-                                    | (asContentsRuleSet(none) @ goodRules)
-                                    | (emptyLabelRulePair      @ labeledRules)
+                                  {   ((#labelRules &p #done) @ pipeline )
+                                    | (M                      @ module)
+                                    | (emptyLabelRulePair     @ labeledRules)
+                                    | (T                      @ seenTerms)
+                                    | (emptyRuleSet           @ goodRules)
+                                    | (emptyLabelRulePair     @ labeledRules)
                                   }) .
 
 endm
-
 
