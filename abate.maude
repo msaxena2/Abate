@@ -1,4 +1,4 @@
-fmod ABATE-STATE is
+mod ABATE-STATE is
 
   sort State .
   sorts   SubState   SubStates .
@@ -10,10 +10,10 @@ fmod ABATE-STATE is
   op _|_           : SubStates SubStates -> SubStates [ctor assoc comm id: emptySubstate format(s n s n)] .
   op {_}           : SubStates           -> State     [ctor format(nss n n ssn)] .
 
-endfm
+endm
 
 
-fmod ABATE-PIPELINE
+mod ABATE-PIPELINE
   is extending ABATE-STATE .
 
   sorts   PipelineStep PipelineSteps .
@@ -29,10 +29,10 @@ fmod ABATE-PIPELINE
 
   op #empty   : -> PipelineStep [ctor] .
   op #done    : -> PipelineStep [ctor] .
-endfm
+endm
 
 
-fmod ABATE-FIND-RULES
+mod ABATE-FIND-RULES
   is extending ABATE-PIPELINE .
      protecting META-LEVEL .
 
@@ -71,7 +71,7 @@ fmod ABATE-FIND-RULES
 
    op _&lrs_ : LabeledRuleSet LabeledRuleSet -> LabeledRuleSet
                                                 [assoc comm id:
-                                                emptyLabelRulePair format(d nt d d)] .
+                                                emptyLabelRulePair format(t ns d d)] .
 
    op labelRules(_,_) : Nat RuleSet -> LabeledRuleSet [ctor] .
 
@@ -91,9 +91,9 @@ fmod ABATE-FIND-RULES
          | (MC                                             @ module )
          | (labelRules(0, getRls(fromContentsModule(MC)))  @ labeledRules )
          | Ss } .
-endfm
+endm
 
-fmod ABATE-FIND-RULES-AUX
+mod ABATE-FIND-RULES-AUX
   is protecting ABATE-FIND-RULES .
 
   op findProblemRules(_,_)    : Module Term -> RuleSet .
@@ -109,6 +109,6 @@ fmod ABATE-FIND-RULES-AUX
                                     | (emptyLabelRulePair      @ labeledRules)
                                   }) .
 
-endfm
+endm
 
 
