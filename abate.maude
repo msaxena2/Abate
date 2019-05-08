@@ -83,11 +83,11 @@ mod ABATE-FIND-RULES
    var P : PipelineStep . var Ps : PipelineSteps .
    var Ss : SubStates . var MC : Contents .
 
-    eq  {  ((#labelRules &p Ps ) @ pipeline)
+    rl  {  ((#labelRules &p Ps ) @ pipeline)
          | (MC                   @ module)
          | (emptyLabelRulePair   @ labeledRules)
          | Ss }
-      = {  (Ps                                             @ pipeline )
+     => {  (Ps                                             @ pipeline )
          | (MC                                             @ module )
          | (labelRules(0, getRls(fromContentsModule(MC)))  @ labeledRules )
          | Ss } .
