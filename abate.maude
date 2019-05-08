@@ -47,7 +47,7 @@ fmod ABATE-FIND-RULES
    subsort LabeledRulePair < LabeledRuleSet < Contents .
    subsort Term < TermSet .
 
-   op module      : -> Tag [ctor] .
+   op module       : -> Tag [ctor] .
    op seenTerms    : -> Tag [ctor] .
    op termQueue    : -> Tag [ctor] .
    op goodRules    : -> Tag [ctor] .
@@ -84,28 +84,33 @@ fmod ABATE-FIND-RULES
    var P : PipelineStep . var Ps : PipelineSteps .
    var Ss : SubStates . var M : Contents .
 
-    eq { ((#labelRules &p Ps ) @ pipeline) | (M @ module) | (emptyLabelRulePair @ labeledRules) | Ss }
-     = { (Ps @ pipeline) | (M @ module ) | ( labelRules(0, getRls(fromContentsModule(M)) ) @ labeledRules ) | Ss } .
+    eq  {  ((#labelRules &p Ps ) @ pipeline)
+         | (M                    @ module)
+         | (emptyLabelRulePair   @ labeledRules)
+         | Ss }
+      = { (Ps                                              @ pipeline)
+         | (M                                              @ module )
+         | ( labelRules(0, getRls(fromContentsModule(M)) ) @ labeledRules )
+         | Ss } .
+
 endfm
 
-quit .
+fmod ABATE-FIND-RULES-AUX
+  is protecting ABATE-FIND-RULES .
 
---- fmod ABATE-FIND-RULES-AUX
----   is protecting ABATE-FIND-RULES .
----
----   op findProblemRules(_,_)    : Module Term -> RuleSet .
----   op problemRulesFromState(_) : State       -> RuleSet .
----
----   var M : Module . var T : Term .
----   eq findProblemRules(M, T) = problemRulesFromState(
----                                   {   ((#labelRules &p #done) @ pipeline )
----                                     | (M                      @ fmodule)
----                                     | (emptyLabelRulePair     @ labeledRules)
----                                     | (T                      @ seenTerms)
----                                     | (none                   @ goodRules)
----                                     | (emptyLabelRulePair     @ labeledRules)
----                                   }) .
----
---- endfm
+  op findProblemRules(_,_)    : Module Term -> RuleSet .
+  op problemRulesFromState(_) : State       -> RuleSet .
+
+  var M : Module . var T : Term .
+  eq findProblemRules(M, T) = problemRulesFromState(
+                                  {   ((#labelRules &p #done)  @ pipeline )
+                                    | (asContentsModule(M)     @ module)
+                                    | (emptyLabelRulePair      @ labeledRules)
+                                    | (asContentsTermSet(T)    @ seenTerms)
+                                    | (asContentsRuleSet(none) @ goodRules)
+                                    | (emptyLabelRulePair      @ labeledRules)
+                                  }) .
+
+endfm
 
 
