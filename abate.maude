@@ -1,53 +1,142 @@
-mod ABATE-PIPELINE
-  is protecting META-LEVEL .
-
+mod ABATE-STATE is
   sort State .
+  sorts   SubState   SubStates .
+  subsort SubState < SubStates .
 
-  sorts LabeledRulePair LabeledRuleSet TermSet .
-
-  subsort LabeledRulePair < LabeledRuleSet .
-
-  subsort Term < TermSet .
-
-
-  op emptyTermSet : -> Term [ctor] .
-
-  op _&ts_ : TermSet TermSet -> TermSet [assoc comm id: emptyTermSet] .
-
-  --- State
-  op { _ | _ | _ | _ } :
-    TermSet TermSet RuleSet LabeledRuleSet -> State [ctor] .
+  sorts Tag Contents .
+  op empty :                     -> SubState  [ctor] .
+  op _@_   : Contents Tag        -> SubStates [ctor] .
+  op _|_   : SubStates SubStates -> SubStates [assoc comm id: empty] .
+  op {_}   : SubStates           -> State     [ctor] .
 endm
 
+
+mod ABATE-PIPELINE
+  is including ABATE-STATE .
+
+  sorts   PipelineStep PipelineSteps .
+
+  subsort PipelineStep  < PipelineSteps .
+  subsort PipelineSteps < Contents .
+
+  op #empty   : -> PipelineStep [ctor] .
+  op #done    : -> PipelineStep [ctor] .
+  op _ &p _ : PipelineSteps PipelineSteps -> PipelineSteps [assoc id: #empty] .
+  op pipeline     : -> Tag [ctor] .
+
+
+  op #empty   : -> PipelineStep [ctor] .
+  op #done    : -> PipelineStep [ctor] .
+
+
+  --- State
+  --- op { _ | _ | _ | _ | _ | _ } :
+  ---   PipelineSteps Module TermSet TermSet RuleSet LabeledRuleSet -> State [ctor] .
+
+endm
 
 
 mod ABATE-FIND-RULES
-  is including ABATE-PIPELINE .
+  is including META-LEVEL + ABATE-PIPELINE .
 
-  --- Given a Set a of Rules, assign natural numbers as labels to them .
+   sorts LabeledRulePair LabeledRuleSet TermSet .
 
-  op (_,_) : Nat Rule -> LabeledRulePair [ctor] .
+   subsort LabeledRulePair < LabeledRuleSet < Contents .
+   subsort Term            < TermSet        < Contents .
+   subsort Module          < Contents .
 
-  op emptyLabelRulePair : -> LabeledRulePair [ctor] .
-
-  op _&lrs_ : LabeledRuleSet LabeledRuleSet
-                -> LabeledRuleSet [assoc comm id: emptyLabelRulePair] .
+   --- This inclusion causes problems, so we improvise.
+   --- subsort Rule < RuleSet  < Contents .
 
 
-  op labelRules(_,_) : Nat RuleSet -> LabeledRuleSet [ctor] .
+   --- op module       : -> Tag [ctor] .
+   --- op seenTerms    : -> Tag [ctor] .
+   --- op termQueue    : -> Tag [ctor] .
+   --- op goodRules    : -> Tag [ctor] .
+   --- op labeledRules : -> Tag [ctor] .
 
-  var R : Rule .
-  var Rs : RuleSet .
-  var N : Nat .
-  eq labelRules(N, none) = emptyLabelRulePair .
-  eq labelRules(N, R Rs) = (N, R) &lrs labelRules(s(N), Rs) .
 
-  op findProblemRules(_,_) : Module Term -> RuleSet .
+   --- op emptyTermSet :                 -> Term    [ctor] .
+   --- op _&ts_        : TermSet TermSet -> TermSet [assoc comm id: emptyTermSet] .
 
-  op problemRulesFromState(_) : State -> RuleSet .
+   --- op #labelRules : -> PipelineStep [ctor] .
 
-  var M : Module . var T : Term .
-  eq findProblemRules(M, T)
-    = problemRulesFromState({ T | emptyTermSet | none | labelRules(0, getRls(M)) } ) .
+   --- op (_,_)              : Nat Rule -> LabeledRulePair [ctor] .
+   --- op emptyLabelRulePair :          -> LabeledRulePair [ctor] .
+
+   --- op _&lrs_ : LabeledRuleSet LabeledRuleSet -> LabeledRuleSet
+   ---                                              [assoc comm id: emptyLabelRulePair] .
+
+   --- op labelRules(_,_) : Nat RuleSet -> LabeledRuleSet [ctor] .
+
+   --- var R : Rule .  var Rs : RuleSet .  var N : Nat .
+
+   --- eq labelRules(N, none) = emptyLabelRulePair .
+   --- eq labelRules(N, R Rs) = (N, R) &lrs labelRules(s(N), Rs) .
+
+   --- var P : PipelineStep . var Ps : PipelineSteps .
+   --- var Ss : SubStates . var M : Module .
+
+   --- eq { ((#labelRules &p Ps ) @ pipeline) | (M @ module) | (emptyLabelRulePair @ labeledRules) | Ss }
+   ---  = { (Ps @ pipeline) | (M @ module ) | ( labelRules(0, getRls(M)) @ labeledRules) | Ss } .
 endm
+
+--- mod ABATE-FIND-RULES-AUX
+---   is including ABATE-FIND-RULES .
+---
+---   op findProblemRules(_,_)    : Module Term -> RuleSet .
+---   op problemRulesFromState(_) : State       -> RuleSet .
+---
+---   var M : Module . var T : Term .
+---   eq findProblemRules(M, T) = problemRulesFromState(
+---                                   {   ((#labelRules &p #done) @ pipeline )
+---                                     | (M                      @ module)
+---                                     | (emptyLabelRulePair     @ labeledRules)
+---                                     | (T                      @ seenTerms)
+---                                     | (none                   @ goodRules)
+---                                     | (emptyLabelRulePair     @ labeledRules)
+---                                   }) .
+---
+--- endm
+--- mod ABATE-FIND-RULES
+---   is including ABATE-PIPELINE .
+---
+---   --- Given a Set a of Rules, assign natural numbers as labels to them .
+---   op #labelRules : -> PipelineStep [ctor] .
+---
+---   op (_,_) : Nat Rule -> LabeledRulePair [ctor] .
+---
+---   op emptyLabelRulePair : -> LabeledRulePair [ctor] .
+---
+---   op _&lrs_ : LabeledRuleSet LabeledRuleSet
+---                 -> LabeledRuleSet [assoc comm id: emptyLabelRulePair] .
+---
+---
+---   op labelRules(_,_) : Nat RuleSet -> LabeledRuleSet [ctor] .
+---
+---   var R : Rule .
+---   var Rs : RuleSet .
+---   var N : Nat .
+---   eq labelRules(N, none) = emptyLabelRulePair .
+---   eq labelRules(N, R Rs) = (N, R) &lrs labelRules(s(N), Rs) .
+---
+---   op findProblemRules(_,_) : Module Term -> RuleSet .
+---
+---   op problemRulesFromState(_) : State -> RuleSet .
+---
+---   var M : Module . var T : Term .
+---   eq findProblemRules(M, T)
+---     = problemRulesFromState({ #labelRules ~p #done | M | T | emptyTermSet | none | emptyLabelRulePair }) .
+---
+---   var PS : PipelineSteps .
+---   vars TS TS': TermSet . var RS :RuleSet .
+---
+---   eq { #labelRules ~p #done | M | TS | TS' | RS | emptyLabelRulePair } = { PS |
+---   M | TS | TS' | RS | labelRules(0, getRls(M)) } .
+---
+---   var RS : RuleSet . var LR : LabeledRuleSet .
+---   eq problemRulesFromState({ #done | M | TS | TS' | RS | LR }) = RS .
+---
+--- endm
+
 
