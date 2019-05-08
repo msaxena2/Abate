@@ -49,6 +49,7 @@ mod ABATE-FIND-RULES
    subsort RuleSet < Contents .
    subsort Module < Contents .
 
+   op done         : -> Tag [ctor] .
    op module       : -> Tag [ctor] .
    op seenTerms    : -> Tag [ctor] .
    op termQueue    : -> Tag [ctor] .
@@ -75,14 +76,16 @@ mod ABATE-FIND-RULES
    eq labelRules(N, emptyRuleSet) = emptyLabelRulePair .
    eq labelRules(N, R &rs RS)     = (N, R) &lrs labelRules(s(N), RS) .
 
-   var P : PipelineStep . var Ps : PipelineSteps .
-   var Ss : SubStates . var M : Module  .
+   var P : PipelineStep . vars Ps D : PipelineSteps .
+   var Ss : SubStates . var M : Module .
 
     rl  {  ((#labelRules &p Ps )     @ pipeline)
+         | (D                        @ done)
          | (M                        @ module)
          | (emptyLabelRulePair       @ labeledRules)
          | Ss }
      => {  (Ps                       @ pipeline )
+         | (#labelRules &p D         @ done )
          | (M                        @ module )
          | (labelRules(0, getRls(M)) @ labeledRules )
          | Ss } .
@@ -97,6 +100,7 @@ mod ABATE-FIND-RULES-AUX
   var M : Module . var T : Term .
   eq findProblemRules(M, T) = problemRulesFromState(
                                   {   ((#labelRules &p #done) @ pipeline )
+                                    | (#empty                 @ done )
                                     | (M                      @ module)
                                     | (emptyLabelRulePair     @ labeledRules)
                                     | (T                      @ seenTerms)
