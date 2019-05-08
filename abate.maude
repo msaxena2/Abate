@@ -7,8 +7,8 @@ fmod ABATE-STATE is
   sorts Tag Contents .
   op emptySubstate :                     -> SubState  [ctor] .
   op _@_           : Contents Tag        -> SubStates [ctor] .
-  op _|_           : SubStates SubStates -> SubStates [ctor assoc comm id: emptySubstate] .
-  op {_}           : SubStates           -> State     [ctor] .
+  op _|_           : SubStates SubStates -> SubStates [ctor assoc comm id: emptySubstate format(s n s n)] .
+  op {_}           : SubStates           -> State     [ctor format(nss n n ssn)] .
 
 endfm
 
@@ -29,12 +29,6 @@ fmod ABATE-PIPELINE
 
   op #empty   : -> PipelineStep [ctor] .
   op #done    : -> PipelineStep [ctor] .
-
-
-  --- Replacement for the original ugly
-  --- op { _ | _ | _ | _ | _ | _ } :
-  ---   PipelineSteps Module TermSet TermSet RuleSet LabeledRuleSet -> State [ctor] .
-
 endfm
 
 
@@ -76,7 +70,8 @@ fmod ABATE-FIND-RULES
    op emptyLabelRulePair :          -> LabeledRulePair [ctor] .
 
    op _&lrs_ : LabeledRuleSet LabeledRuleSet -> LabeledRuleSet
-                                                [assoc comm id: emptyLabelRulePair] .
+                                                [assoc comm id:
+                                                emptyLabelRulePair format(d nt d d)] .
 
    op labelRules(_,_) : Nat RuleSet -> LabeledRuleSet [ctor] .
 
@@ -96,7 +91,6 @@ fmod ABATE-FIND-RULES
          | (MC                                             @ module )
          | (labelRules(0, getRls(fromContentsModule(MC)))  @ labeledRules )
          | Ss } .
-
 endfm
 
 fmod ABATE-FIND-RULES-AUX
