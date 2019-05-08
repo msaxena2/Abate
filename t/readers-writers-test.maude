@@ -3,7 +3,7 @@ in readers-writers-single-rule.maude .
 in ../abate.maude .
 
 mod R+W-TEST is
-  protecting ABATE-FIND-RULES
+  protecting ABATE-FIND-RULES-AUX
              + (R+W)
              + STRING .
 
@@ -18,13 +18,13 @@ mod R+W-TEST is
   eq findRulesTest(O, E, M) = if (O == E) then ("Pass") else ( M ) fi .
 endm
 
-red in R+W-TEST : findRulesTest( findProblemRules( upModule( ('R+W), true )
+red in R+W-TEST : findRulesTest( findProblemRules( upModule( ('R+W), false )
                                                  , upTerm( < 0 , 0 > )
                                                  )
                                , upRls( ('R+W-SINGLE-RULE), false )
                                , "Fail" ) .
 
-red in R+W-TEST :  findProblemRules( upModule( ('R+W), true )
+red in R+W-TEST :  findProblemRules( upModule( ('R+W), false )
                                              , upTerm( < 0 , 0 > )
                                    ) .
 quit .

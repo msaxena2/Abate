@@ -57,14 +57,18 @@ fmod ABATE-FIND-RULES
    op emptyTermSet :                 -> TermSet [ctor] .
    op _&ts_        : TermSet TermSet -> TermSet [assoc comm id: emptyTermSet] .
 
-   op asContentsTermSet_ : TermSet -> Contents [ctor] .
-   op asContentsModule_  : Module  -> Contents [ctor] .
-   op asContentsRuleSet_ : RuleSet -> Contents [ctor] .
+   op asContentsTermSet(_) : TermSet -> Contents [ctor] .
+   op asContentsModule(_)  : Module  -> Contents [ctor] .
+   op asContentsRuleSet(_) : RuleSet -> Contents [ctor] .
 
-   op fromContentsTermSet_ : Contents -> TermSet .
-   op fromContentsModule_  : Contents -> Module .
-   op fromContentsRuleSet_ : Contents -> RuleSet .
+   op fromContentsTermSet(_) : Contents -> TermSet .
+   op fromContentsModule(_)  : Contents -> Module .
+   op fromContentsRuleSet(_) : Contents -> RuleSet .
 
+   var TS : TermSet . var M : Module . var RS : RuleSet .
+   eq fromContentsTermSet(asContentsTermSet(TS)) = TS .
+   eq fromContentsModule(asContentsModule(M))    = M .
+   eq fromContentsRuleSet(asContentsRuleSet(RS)) = RS .
 
    op #labelRules : -> PipelineStep [ctor] .
 
@@ -76,21 +80,21 @@ fmod ABATE-FIND-RULES
 
    op labelRules(_,_) : Nat RuleSet -> LabeledRuleSet [ctor] .
 
-   var R : Rule .  var Rs : RuleSet .  var N : Nat .
+   var R : Rule . var N : Nat .
 
    eq labelRules(N, none) = emptyLabelRulePair .
-   eq labelRules(N, R Rs) = (N, R) &lrs labelRules(s(N), Rs) .
+   eq labelRules(N, R RS) = (N, R) &lrs labelRules(s(N), RS) .
 
    var P : PipelineStep . var Ps : PipelineSteps .
-   var Ss : SubStates . var M : Contents .
+   var Ss : SubStates . var MC : Contents .
 
     eq  {  ((#labelRules &p Ps ) @ pipeline)
-         | (M                    @ module)
+         | (MC                   @ module)
          | (emptyLabelRulePair   @ labeledRules)
          | Ss }
-      = { (Ps                                              @ pipeline)
-         | (M                                              @ module )
-         | ( labelRules(0, getRls(fromContentsModule(M)) ) @ labeledRules )
+      = {  (Ps                                             @ pipeline )
+         | (MC                                             @ module )
+         | (labelRules(0, getRls(fromContentsModule(MC)))  @ labeledRules )
          | Ss } .
 
 endfm
